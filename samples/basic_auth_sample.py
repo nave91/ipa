@@ -39,6 +39,7 @@ class Repos(Collection):
         return 'https://api.github.com/users/{}/repos'.format(self.username)
 
     def decode(self, response):
+        import ipdb; ipdb.set_trace()
         return [parse_repo(r) for r in json.loads(response.body)]
 
 
@@ -59,9 +60,9 @@ def main():
             raise error
 
         for repo in repos:
-            import ipdb; ipdb.set_trace()
             print repo
 
+    import ipdb; ipdb.set_trace()
     repos = Repos('jaimegildesagredo', httpclient.AsyncHTTPClient(force_instance=True, defaults=dict(user_agent='myagent')))
     repos.all(on_repos)
 
