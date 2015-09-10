@@ -10,7 +10,9 @@ except ImportError:
 
 from functools import partial
 
-from tornado import escape
+from tornado import escape, httputil
+from tornado.httpclient import HTTPRequest, AsyncHTTPClient
+from auth import OAuth1
 
 class Collection(object):
     table = None
@@ -18,11 +20,20 @@ class Collection(object):
     def __init__(self, client):
         self.client = client
 
-    def all(self, callback):
-        self.request_all(callback)
+    def all(self, callback, **kwargs):
+        self.request_all(callback, **kwargs)
 
-    def request_all(self, callback):
-        self.client.fetch(self.url, callback=partial(self.on_query, callback))
+    def request_all(self, callback, auth=None, url_params=None):
+        url = self.url
+        if url_params:
+            url = httputil.url_concat(url, url_params)
+        if isinstance(self.client, AsyncHTTPClient):
+            request = HTTPRequest(url)
+        else:
+            request = url
+        if auth:
+            auth(request)
+        self.client.fetch(request, callback=partial(self.on_query, callback))
 
     def query(self, params, callback):
         self.request_query(callback, params)
@@ -60,11 +71,20 @@ class Collection(object):
         else:
             callback(result, None)
 
-    def get(self, id_, callback):
-        self.request_get(id_, callback)
+    def get(self, id_, callback, **kwargs):
+        self.request_get(id_, callback, **kwargs)
 
-    def request_get(self, id_, callback):
-        self.client.fetch(self._url(id_), callback=partial(self.on_get, callback))
+    def request_get(self, id_, callback, auth=None, url_params=None):
+        url= self._url(id_)
+        if url_params:
+            url = httputil.url_concat(url, url_params)
+        if isinstance(self.client, AsyncHTTPClient):
+            request = HTTPRequest(url)
+        else:
+            request = url
+        if auth:
+            auth(request)
+        self.client.fetch(request, callback=partial(self.on_get, callback))
 
     def on_get(self, callback, response):
         
