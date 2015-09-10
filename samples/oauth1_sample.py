@@ -51,7 +51,7 @@ class Businesses(Collection):
         return [parse_repo(r) for r in businesses]
 
 
-def parse_repo(raw):
+def parse_response(raw):
     return {
         'id': raw['id'],
         'name': raw['name'],
@@ -68,13 +68,13 @@ def main():
         'limit' : search_limit
     }
 
-    def on_repos(repos, error):
+    def on_response(response, error):
         ioloop.IOLoop.instance().stop()
 
         if error:
             raise error
 
-        for repo in repos:
+        for repo in response:
             print repo
 
     auth = OAuth1(client_key=CLIENT_KEY,
@@ -85,7 +85,7 @@ def main():
 
     AsyncHTTPClient.configure(None, defaults=dict(user_agent="ipa-agent"))
     buss = Businesses(AsyncHTTPClient())
-    buss.all(on_repos, auth=auth, url_params=url_params)
+    buss.all(on_response, auth=auth, url_params=url_params)
 
     ioloop.IOLoop.instance().start()
 
