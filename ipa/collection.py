@@ -23,12 +23,12 @@ class Collection(object):
     def all(self, callback, **kwargs):
         self.request_all(callback, **kwargs)
 
-    def request_all(self, callback, auth=None, url_params=None):
+    def request_all(self, callback, auth=None, url_params=None, req_kwargs={}):
         url = self.url
         if url_params:
             url = httputil.url_concat(url, url_params)
         if isinstance(self.client, AsyncHTTPClient):
-            request = HTTPRequest(url)
+            request = HTTPRequest(url, **req_kwargs)
         else:
             request = url
         if auth:
